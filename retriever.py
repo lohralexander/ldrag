@@ -5,8 +5,8 @@ import uuid
 
 from pyvis.network import Network
 
-from gptconnector import *
-from ontology import *
+from ldrag.gptconnector import *
+from ldrag.ontology import *
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -201,6 +201,6 @@ def create_rag_instance_graph(rag_dict, question_id, question):
 
 if __name__ == '__main__':
     owl = Ontology()
-    owl.deserialize("research/ontology/ontology.json")
+    owl.deserialize("../research/ontology/ontology_converted.json")
     information_retriever_with_graph(user_query="How many entries does the niryo dataset from september have?",
                                      ontology=owl)
