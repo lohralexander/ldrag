@@ -1,15 +1,9 @@
-import logging
-import os
 import re
 import uuid
 
-from pyvis.network import Network
-
-from ldrag.gptconnector import *
-from ldrag.ontology import *
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+from ldrag.config import logger
+from ldrag.gptconnector import gpt_request_with_history, gpt_request
+from ldrag.ontology import Ontology
 
 
 def information_retriever(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0):

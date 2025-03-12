@@ -1,7 +1,5 @@
-import json
 import re
 
-import numpy as np
 import pandas as pd
 from rdflib import Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
@@ -9,6 +7,7 @@ from sklearn.datasets import load_iris
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from ldrag.config import logger
 
 
 def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, attributes, X_test, y_test, output_file):
@@ -42,12 +41,13 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, attributes, 
 
     # Ontology Structure
     ontology_entry = {"node_id": model_id, "node_class": "Model",
-        "training_information": "Trained using sklearn in Python. A split validation was used.",
-        "connections": [[dataset_id, task_id] + attributes, ["trainedWith", "achieves"] + ["used"] * len(attributes)],
-        "algorithm": algorithm_name, "accuracy": accuracy,
-        "precision": {f"Class {i}": p for i, p in enumerate(precision)},
-        "recall": {f"Class {i}": r for i, r in enumerate(recall)},
-        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)}, "confusionMatrix": conf_matrix, }
+                      "training_information": "Trained using sklearn in Python. A split validation was used.",
+                      "connections": [[dataset_id, task_id] + attributes,
+                                      ["trainedWith", "achieves"] + ["used"] * len(attributes)],
+                      "algorithm": algorithm_name, "accuracy": accuracy,
+                      "precision": {f"Class {i}": p for i, p in enumerate(precision)},
+                      "recall": {f"Class {i}": r for i, r in enumerate(recall)},
+                      "f1Score": {f"Class {i}": f for i, f in enumerate(f1)}, "confusionMatrix": conf_matrix, }
 
     if roc_auc is not None:
         ontology_entry["rocAucScore"] = roc_auc
@@ -66,9 +66,67 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, attributes, 
     with open(output_file, "w") as f:
         json.dump(data, f, indent=4)
 
-    print(f"Ontology model appended to {output_file}")
+    logger.info(f"Ontology model appended to {output_file}")
 
     return ontology_entry
+
+
+import shap
+import json
+import numpy as np
+
+
+def calculate_shap_values(model, model_id, X_train, X_test, output_file):
+    """
+    Calculates SHAP values for a given model and updates the ontology JSON.
+
+    :param model: Trained sklearn model
+    :param model_id: Unique model identifier
+    :param X_train: Training data features (for background data)
+    :param X_test: Test data features (for explanation)
+    :param output_file: Path to the JSON file where ontology is stored
+    """
+    # Initialize SHAP Explainer
+    explainer = shap.Explainer(model, X_train)
+
+    # Compute SHAP values
+    shap_values = explainer(X_test)
+
+    # Convert SHAP values to a format suitable for JSON
+    shap_summary = {}
+    feature_names = X_train.columns.tolist()  # Extract feature names
+
+    for i, feature in enumerate(feature_names):
+        shap_summary[feature] = {
+            "mean_shap_value": np.mean(np.abs(shap_values.values[:, i])).item(),  # Convert numpy to float
+            "shap_values": shap_values.values[:, i].tolist()  # List of SHAP values for each sample
+        }
+
+    # Load existing ontology JSON
+    try:
+        with open(output_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("Error: Ontology JSON file not found or invalid!")
+        return
+
+    # Find the correct model in the ontology JSON and append SHAP values
+    model_found = False
+    for instance in data["node_instances"]:
+        if instance["node_id"] == model_id and instance["node_class"] == "Model":
+            instance["shap_values"] = shap_summary
+            model_found = True
+            break
+
+    if not model_found:
+        print(f"Error: Model '{model_id}' not found in ontology JSON!")
+        return
+
+    # Save updated ontology JSON
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+    print(f"SHAP values added to model '{model_id}' in {output_file}")
 
 
 def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, attributes, X_test, y_test, output_file):
@@ -100,14 +158,25 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, attributes, 
     # Algorithm Name
     algorithm_name = type(model).__name__
 
+    # Updated connections format
+    connections = [
+                      {"target": dataset_id, "relation": "trainedWith"},
+                      {"target": task_id, "relation": "achieves"}
+                  ] + [{"target": attr, "relation": "used"} for attr in attributes]
+
     # Ontology Structure
-    ontology_entry = {"node_id": model_id, "node_class": "Model",
+    ontology_entry = {
+        "node_id": model_id,
+        "node_class": "Model",
         "training_information": "Trained using sklearn in Python. A split validation was used.",
-        "connections": [[dataset_id, task_id] + attributes, ["trainedWith", "achieves"] + ["used"] * len(attributes)],
-        "algorithm": algorithm_name, "accuracy": accuracy,
+        "connections": connections,
+        "algorithm": algorithm_name,
+        "accuracy": accuracy,
         "precision": {f"Class {i}": p for i, p in enumerate(precision)},
         "recall": {f"Class {i}": r for i, r in enumerate(recall)},
-        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)}, "confusionMatrix": conf_matrix, }
+        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)},
+        "confusionMatrix": conf_matrix,
+    }
 
     if roc_auc is not None:
         ontology_entry["rocAucScore"] = roc_auc
@@ -147,9 +216,22 @@ def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, 
     amount_of_rows = df.shape[0]
     amount_of_attributes = df.shape[1]
 
-    dataset_entry = {"node_id": dataset_id, "amountOfRows": amount_of_rows, "amountOfAttributes": amount_of_attributes,
-        "node_class": "Dataset", "domain": domain, "locationOfDataRecording": location, "dateOfRecording": date,
-        "connections": [attributes + models, ["has"] * len(attributes) + ["usedBy"] * len(models)]}
+    # Updated connections format (as list of dictionaries)
+    connections = (
+            [{"target": attr, "relation": "has"} for attr in attributes] +
+            [{"target": model, "relation": "usedBy"} for model in models]
+    )
+
+    dataset_entry = {
+        "node_id": dataset_id,
+        "amountOfRows": amount_of_rows,
+        "amountOfAttributes": amount_of_attributes,
+        "node_class": "Dataset",
+        "domain": domain,
+        "locationOfDataRecording": location,
+        "dateOfRecording": date,
+        "connections": connections
+    }
 
     # Load existing JSON file
     try:
@@ -224,6 +306,7 @@ import requests
 from rdflib import Graph
 
 
+# Prototype TODO Improve
 def upload_ontology():
     # GraphDB Configuration
     GRAPHDB_URL = "http://localhost:7200"  # Change if needed
@@ -249,7 +332,7 @@ def upload_ontology():
 
     # Send the update request
     response = requests.post(SPARQL_UPDATE_URL, data={"update": SPARQL_UPDATE},
-        headers={"Content-Type": "application/x-www-form-urlencoded"})
+                             headers={"Content-Type": "application/x-www-form-urlencoded"})
 
     # Check response
     if response.status_code == 204:
@@ -272,7 +355,7 @@ if __name__ == '__main__':
     model_id = "model_iris_pm"
     dataset_id = "iris_dataset"
     task_id = "classification_task"
-    output_file = "./research/ontology/ontologyTest.json"
+    output_file = "ontology_converted.json"
 
     # Add dataset to ontology
     add_dataset_metadata_from_dataframe(dataset_id, df, "Iris Dataset", "Unknown Location", "2024", [model_id],
@@ -282,7 +365,11 @@ if __name__ == '__main__':
     sklearn_model_to_ontology(model, model_id, dataset_id, task_id, df.columns.tolist(), X_test, y_test, output_file)
 
     # Example Usage
-    convert_json_to_owl("./research/ontology/ontologyTest.json", "output.owl")
+    # convert_json_to_owl("../research/ontology/ontology_converted.json", "output.owl")
 
     # Run the Upload
-    upload_ontology()
+    # upload_ontology()
+
+    # Assume `model` is an already trained sklearn model
+    calculate_shap_values(model, model_id="model_iris_pm", X_train=X_train, X_test=X_test,
+                          output_file="ontology_converted.json")
