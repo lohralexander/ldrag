@@ -1,5 +1,9 @@
+import json
+import os
 import re
 import uuid
+
+from pyvis.network import Network
 
 from ldrag.config import logger
 from ldrag.gptconnector import gpt_request_with_history, gpt_request
@@ -94,7 +98,18 @@ def execute_query(query, ontology):
     return list(ontology.get_nodes(matches).values())
 
 
+import os
+from pyvis.network import Network
+
 def create_rag_instance_graph(rag_dict, question_id, question):
+    """
+    Creates an interactive graph visualization for Retrieval Augmented Generation (RAG) instances.
+
+    :param rag_dict: Dictionary containing nodes and their connections
+    :param question_id: Unique identifier for the question
+    :param question: The question being visualized
+    :return: Path to the saved HTML file containing the graph
+    """
     net = Network(height="100vh", width="100vw", directed=True, notebook=False)
 
     # Header blue color
@@ -108,11 +123,11 @@ def create_rag_instance_graph(rag_dict, question_id, question):
             color=header_blue  # Set node color to header blue
         )
 
-    # Add edges
+    # Add edges (updated to use new connection format)
     for node in rag_dict.values():
-        for connection, edge in zip(node.get_node_connections()[0], node.get_node_connections()[1]):
-            if connection in rag_dict.keys():
-                net.add_edge(node.get_node_id(), connection, label=edge, arrows="to", length=400)
+        for connection in node.get_node_connections():  # Using list of dictionaries
+            if connection["target"] in rag_dict.keys():
+                net.add_edge(node.get_node_id(), connection["target"], label=connection["relation"], arrows="to", length=400)
 
     # Save the graph
     output_file = f"static/graph/rag_{question_id}.html"
@@ -193,8 +208,9 @@ def create_rag_instance_graph(rag_dict, question_id, question):
     return output_file
 
 
+
 if __name__ == '__main__':
     owl = Ontology()
-    owl.deserialize("../research/ontology/ontology_converted.json")
+    owl.deserialize("../ontology_base.json")
     information_retriever_with_graph(user_query="How many entries does the niryo dataset from september have?",
                                      ontology=owl)

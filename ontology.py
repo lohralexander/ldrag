@@ -161,6 +161,7 @@ class Ontology:
             "Explanation": node.get_explanation(),
             "Connected Instances": ", ".join(
                 f"{conn['relation']} {conn['target']} (Node Class {self.get_node(conn['target']).get_node_class_id()})"
+                if self.get_node(conn['target']) else f"{conn['relation']} {conn['target']} (Node Class Unknown)"
                 for conn in node.get_node_connections()
             )
         }
