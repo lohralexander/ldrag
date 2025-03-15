@@ -123,13 +123,17 @@ def create_rag_instance_graph(rag_dict, question_id, question):
             color=header_blue  # Set node color to header blue
         )
 
-    # Add edges (updated to use new connection format)
     for node in rag_dict.values():
-        for connection in node.get_node_connections():  # Using list of dictionaries
-            if connection["target"] in rag_dict.keys():
-                net.add_edge(node.get_node_id(), connection["target"], label=connection["relation"], arrows="to", length=400)
+        for connection in node.get_node_connections():
+            # Ensure connection is a dictionary and contains necessary keys
+            if isinstance(connection, dict) and "target" in connection and "relation" in connection:
+                target = connection["target"]
+                relation = connection["relation"]
 
-    # Save the graph
+                # Ensure the target node actually exists in rag_dict before adding an edge
+                if target in rag_dict:
+                    net.add_edge(node.get_node_id(), target, label=relation, arrows="to", length=400)
+
     output_file = f"static/graph/rag_{question_id}.html"
     directory = os.path.dirname(output_file)
     if not os.path.exists(directory):

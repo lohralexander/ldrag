@@ -7,6 +7,14 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from ldrag.config import logger
 
 
+import json
+import numpy as np
+import logging
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
+
+logger = logging.getLogger("OntologyApp")
+
 def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_test, y_test, output_file,
                               preprocessor=None):
     """
@@ -44,10 +52,10 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
         (len(X_test_transformed), pipeline.named_steps['model'].n_classes_))
 
     # Compute metrics
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average=None).tolist()
-    recall = recall_score(y_test, y_pred, average=None).tolist()
-    f1 = f1_score(y_test, y_pred, average=None).tolist()
+    accuracy = accuracy_score(y_test, y_pred) if hasattr(model, "predict_proba") else None
+    precision = precision_score(y_test, y_pred, average=None).tolist() if hasattr(model, "predict_proba") else None
+    recall = recall_score(y_test, y_pred, average=None).tolist() if hasattr(model, "predict_proba") else None
+    f1 = f1_score(y_test, y_pred, average=None).tolist() if hasattr(model, "predict_proba") else None
     roc_auc = roc_auc_score(y_test, y_proba[:, 1], multi_class='ovr') if hasattr(model, "predict_proba") else None
     conf_matrix = confusion_matrix(y_test, y_pred).tolist()
 
@@ -84,18 +92,34 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
 
     node_instances.extend(processed_feature_nodes)
 
+    # Check if model is a regression model
+    model_weights = None
+    if hasattr(model, "coef_"):  # Linear models like LinearRegression, LogisticRegression
+        model_weights = {f: w for f, w in zip(X_train.columns, model.coef_.flatten().tolist())}
+
+    elif hasattr(model, "feature_importances_"):  # Tree-based models like DecisionTree, RandomForest
+        model_weights = {f: w for f, w in zip(X_train.columns, model.feature_importances_.tolist())}
+
     # Define model node
-    model_node = {"node_id": model_id, "node_class": "Model",
+    model_node = {
+        "node_id": model_id,
+        "node_class": "Model",
         "training_information": "Trained using sklearn in Python. A split validation was used.",
-        "algorithm": algorithm_name, "accuracy": accuracy,
-        "precision": {f"Class {i}": p for i, p in enumerate(precision)},
-        "recall": {f"Class {i}": r for i, r in enumerate(recall)},
-        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)}, "confusionMatrix": conf_matrix,
+        "algorithm": algorithm_name,
+        "accuracy": accuracy,
+        "precision": {f"Class {i}": p for i, p in enumerate(precision)} if precision else None,
+        "recall": {f"Class {i}": r for i, r in enumerate(recall)} if recall else None,
+        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)} if f1 else None,
+        "confusionMatrix": conf_matrix if hasattr(model, "predict_proba") else None,
         "connections": [{"target": dataset_id, "relation": "trainedWith"},
-                        {"target": task_id, "relation": "achieves"}] + model_connections}
+                        {"target": task_id, "relation": "achieves"}] + model_connections
+    }
 
     if roc_auc is not None:
         model_node["rocAucScore"] = roc_auc
+
+    if model_weights:  # Only include weights if it is a regression model
+        model_node["weights"] = model_weights
 
     node_instances.append(model_node)
 
@@ -103,14 +127,23 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
-    logger.info(f"Ontology model appended to {output_file}")
+    logger.info(f"Ontology model appended to {output_file}, weights added if applicable.")
     return model_node
 
+
+
+import json
+import pandas as pd
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, models, output_file):
     """
     Extracts dataset metadata from a pandas DataFrame and appends it to the ontology JSON file.
     Ensures all attributes exist as separate nodes before adding dataset metadata.
+    Also adds statistical properties (mean, min, max, std) for numerical attributes.
 
     :param dataset_id: Unique identifier for the dataset
     :param df: Pandas DataFrame containing the dataset
@@ -134,33 +167,59 @@ def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, 
     # Check existing nodes to prevent duplicates
     existing_node_ids = {node["node_id"] for node in data["node_instances"]}
 
-    # Ensure all attributes exist as separate nodes
+    # Ensure all attributes exist as separate nodes with statistics
     for attr in attributes:
         if attr not in existing_node_ids:
-            attribute_node = {"node_id": attr, "node_class": "Attribute",
-                              "connections": [{"target": dataset_id, "relation": "partOf"}]}
+            # Determine if the attribute is numerical
+            if pd.api.types.is_numeric_dtype(df[attr]):
+                attr_stats = {
+                    "mean": round(float(df[attr].mean()), 6) if not df[attr].isna().all() else None,
+                    "min": round(float(df[attr].min()), 6) if not df[attr].isna().all() else None,
+                    "max": round(float(df[attr].max()), 6) if not df[attr].isna().all() else None,
+                    "std_dev": round(float(df[attr].std()), 6) if not df[attr].isna().all() else None
+                }
+            else:
+                attr_stats = {}  # No statistics for categorical attributes
+
+            # Create attribute node
+            attribute_node = {
+                "node_id": attr,
+                "node_class": "Attribute",
+                "connections": [{"target": dataset_id, "relation": "partOf"}],
+                **attr_stats  # Merge stats into the node if available
+            }
+
             data["node_instances"].append(attribute_node)
             existing_node_ids.add(attr)  # Update existing node set
 
     # Create dataset entry
     connections = (
-            [{"target": attr, "relation": "has"} for attr in attributes] + [{"target": model, "relation": "usedBy"} for
-                                                                            model in models])
+        [{"target": attr, "relation": "has"} for attr in attributes] +
+        [{"target": model, "relation": "usedBy"} for model in models]
+    )
 
-    dataset_entry = {"node_id": dataset_id, "amountOfRows": amount_of_rows, "amountOfAttributes": amount_of_attributes,
-                     "node_class": "Dataset", "domain": domain, "locationOfDataRecording": location,
-                     "dateOfRecording": date, "connections": connections}
+    dataset_entry = {
+        "node_id": dataset_id,
+        "amountOfRows": amount_of_rows,
+        "amountOfAttributes": amount_of_attributes,
+        "node_class": "Dataset",
+        "domain": domain,
+        "locationOfDataRecording": location,
+        "dateOfRecording": date,
+        "connections": connections
+    }
 
     # Append dataset entry
     data["node_instances"].append(dataset_entry)
 
     # Save back to JSON
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
     logger.info(f"Dataset metadata appended to {output_file}, and new attributes added if missing.")
 
     return dataset_entry
+
 
 
 import shap
