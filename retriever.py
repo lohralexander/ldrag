@@ -5,9 +5,9 @@ import uuid
 
 from pyvis.network import Network
 
-from ldrag.config import logger
-from ldrag.gptconnector import gpt_request_with_history, gpt_request
-from ldrag.ontology import Ontology
+from config import logger
+from gptconnector import gpt_request_with_history, gpt_request
+from ontology import Ontology
 
 
 def information_retriever(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0):
@@ -97,9 +97,6 @@ def execute_query(query, ontology):
     matches = re.findall(pattern, query)
     return list(ontology.get_nodes(matches).values())
 
-
-import os
-from pyvis.network import Network
 
 def create_rag_instance_graph(rag_dict, question_id, question):
     """
@@ -210,7 +207,6 @@ def create_rag_instance_graph(rag_dict, question_id, question):
         file.write(html_content)
 
     return output_file
-
 
 
 if __name__ == '__main__':
