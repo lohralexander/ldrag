@@ -1,19 +1,23 @@
+import json
 import re
 
+import catboost as cb
+import lightgbm as lgb
+import numpy as np
+import pandas as pd
+import shap
+import xgboost as xgb
+from config import logger
+from rdflib import Graph
 from rdflib import Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
-
-from ldrag.config import logger
-
-
-import json
-import numpy as np
-import logging
+from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
+from sklearn.tree import DecisionTreeClassifier
 
-logger = logging.getLogger("OntologyApp")
 
 def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_test, y_test, output_file,
                               preprocessor=None):
@@ -87,7 +91,7 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
                 (node for node in node_instances if node["node_id"] == transformed_feature), None)
             if not existing_transformed_node:
                 processed_feature_nodes.append({"node_id": transformed_feature, "node_class": "ProcessedAttribute",
-                    "connections": [{"target": raw_feature, "relation": "derivedFrom"}]})
+                                                "connections": [{"target": raw_feature, "relation": "derivedFrom"}]})
             model_connections.append({"target": transformed_feature, "relation": "used"})
 
     node_instances.extend(processed_feature_nodes)
@@ -101,19 +105,15 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
         model_weights = {f: w for f, w in zip(X_train.columns, model.feature_importances_.tolist())}
 
     # Define model node
-    model_node = {
-        "node_id": model_id,
-        "node_class": "Model",
-        "training_information": "Trained using sklearn in Python. A split validation was used.",
-        "algorithm": algorithm_name,
-        "accuracy": accuracy,
-        "precision": {f"Class {i}": p for i, p in enumerate(precision)} if precision else None,
-        "recall": {f"Class {i}": r for i, r in enumerate(recall)} if recall else None,
-        "f1Score": {f"Class {i}": f for i, f in enumerate(f1)} if f1 else None,
-        "confusionMatrix": conf_matrix if hasattr(model, "predict_proba") else None,
-        "connections": [{"target": dataset_id, "relation": "trainedWith"},
-                        {"target": task_id, "relation": "achieves"}] + model_connections
-    }
+    model_node = {"node_id": model_id, "node_class": "Model",
+                  "training_information": "Trained using sklearn in Python. A split validation was used.",
+                  "algorithm": algorithm_name, "accuracy": accuracy,
+                  "precision": {f"Class {i}": p for i, p in enumerate(precision)} if precision else None,
+                  "recall": {f"Class {i}": r for i, r in enumerate(recall)} if recall else None,
+                  "f1Score": {f"Class {i}": f for i, f in enumerate(f1)} if f1 else None,
+                  "confusionMatrix": conf_matrix if hasattr(model, "predict_proba") else None,
+                  "connections": [{"target": dataset_id, "relation": "trainedWith"},
+                                  {"target": task_id, "relation": "achieves"}] + model_connections}
 
     if roc_auc is not None:
         model_node["rocAucScore"] = roc_auc
@@ -130,14 +130,6 @@ def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_t
     logger.info(f"Ontology model appended to {output_file}, weights added if applicable.")
     return model_node
 
-
-
-import json
-import pandas as pd
-import numpy as np
-import logging
-
-logger = logging.getLogger(__name__)
 
 def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, models, output_file):
     """
@@ -172,42 +164,30 @@ def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, 
         if attr not in existing_node_ids:
             # Determine if the attribute is numerical
             if pd.api.types.is_numeric_dtype(df[attr]):
-                attr_stats = {
-                    "mean": round(float(df[attr].mean()), 6) if not df[attr].isna().all() else None,
-                    "min": round(float(df[attr].min()), 6) if not df[attr].isna().all() else None,
-                    "max": round(float(df[attr].max()), 6) if not df[attr].isna().all() else None,
-                    "std_dev": round(float(df[attr].std()), 6) if not df[attr].isna().all() else None
-                }
+                attr_stats = {"mean": round(float(df[attr].mean()), 6) if not df[attr].isna().all() else None,
+                              "min": round(float(df[attr].min()), 6) if not df[attr].isna().all() else None,
+                              "max": round(float(df[attr].max()), 6) if not df[attr].isna().all() else None,
+                              "std_dev": round(float(df[attr].std()), 6) if not df[attr].isna().all() else None}
             else:
                 attr_stats = {}  # No statistics for categorical attributes
 
             # Create attribute node
-            attribute_node = {
-                "node_id": attr,
-                "node_class": "Attribute",
-                "connections": [{"target": dataset_id, "relation": "partOf"}],
-                **attr_stats  # Merge stats into the node if available
-            }
+            attribute_node = {"node_id": attr, "node_class": "Attribute",
+                              "connections": [{"target": dataset_id, "relation": "partOf"}], **attr_stats
+                              # Merge stats into the node if available
+                              }
 
             data["node_instances"].append(attribute_node)
             existing_node_ids.add(attr)  # Update existing node set
 
     # Create dataset entry
     connections = (
-        [{"target": attr, "relation": "has"} for attr in attributes] +
-        [{"target": model, "relation": "usedBy"} for model in models]
-    )
+            [{"target": attr, "relation": "has"} for attr in attributes] + [{"target": model, "relation": "usedBy"} for
+                                                                            model in models])
 
-    dataset_entry = {
-        "node_id": dataset_id,
-        "amountOfRows": amount_of_rows,
-        "amountOfAttributes": amount_of_attributes,
-        "node_class": "Dataset",
-        "domain": domain,
-        "locationOfDataRecording": location,
-        "dateOfRecording": date,
-        "connections": connections
-    }
+    dataset_entry = {"node_id": dataset_id, "amountOfRows": amount_of_rows, "amountOfAttributes": amount_of_attributes,
+                     "node_class": "Dataset", "domain": domain, "locationOfDataRecording": location,
+                     "dateOfRecording": date, "connections": connections}
 
     # Append dataset entry
     data["node_instances"].append(dataset_entry)
@@ -221,31 +201,15 @@ def add_dataset_metadata_from_dataframe(dataset_id, df, domain, location, date, 
     return dataset_entry
 
 
-
-import shap
-import json
-import numpy as np
-import logging
-from sklearn.pipeline import Pipeline
-
-logger = logging.getLogger(__name__)
-
-
 def get_shap_explainer(model, X_train_transformed):
     """
     Selects the correct SHAP explainer based on the model type.
     """
-    from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-    from sklearn.tree import DecisionTreeClassifier
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.neural_network import MLPClassifier
-    import xgboost as xgb
-    import lightgbm as lgb
-    import catboost as cb
 
     if isinstance(model, (
-    DecisionTreeClassifier, RandomForestClassifier, GradientBoostingClassifier, xgb.XGBClassifier, lgb.LGBMClassifier,
-    cb.CatBoostClassifier)):
+            DecisionTreeClassifier, RandomForestClassifier, GradientBoostingClassifier, xgb.XGBClassifier,
+            lgb.LGBMClassifier,
+            cb.CatBoostClassifier)):
         return shap.TreeExplainer(model)
     elif isinstance(model, LogisticRegression):
         return shap.LinearExplainer(model, X_train_transformed)
@@ -311,8 +275,8 @@ def calculate_shap_values(model, model_id, X_train, X_test, output_file, preproc
 
         # Create a SHAP node for this feature
         shap_node = {"node_id": f"SHAP_{model_id}_{feature}", "node_class": "SHAPValue", "feature": feature,
-            "mean_shap_value": mean_shap_value,
-            "connections": [{"target": model_id, "relation": "relatedTo"}, {"target": feature, "relation": "explains"}]}
+                     "mean_shap_value": mean_shap_value, "connections": [{"target": model_id, "relation": "relatedTo"},
+                                                                         {"target": feature, "relation": "explains"}]}
         shap_nodes.append(shap_node)
 
     # Load existing ontology JSON
@@ -425,9 +389,6 @@ def owl_to_json(owl_file, json_file):
     :param owl_file: Path to the OWL file
     :param json_file: Path to save the output JSON file
     """
-
-
-from rdflib import Graph
 
 
 # Prototype TODO Improve
