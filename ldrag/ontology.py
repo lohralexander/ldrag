@@ -5,6 +5,9 @@ import networkx as nx
 from matplotlib import pyplot as plt
 from pyvis.network import Network
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def _insert_headline(headline, output_file):
     with open(output_file, 'r') as file:

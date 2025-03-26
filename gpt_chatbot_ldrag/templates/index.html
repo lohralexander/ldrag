@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600;700&display=swap"
+          rel="stylesheet">
+    <title>ChatGPT API Interface</title>
+    <style>
+        body {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        #chat-container {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        #chat-log {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #fafafa;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .user {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            text-align: right;
+            color: #00A8CE;
+        }
+        .bot {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            text-align: left;
+            color: #6637B6;
+        }
+        #input-container {
+            display: flex;
+        }
+        #user-input {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #send-button {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #457b9d;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        #send-button:hover {
+            background-color: #1d3557;
+        }
+        #chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #457b9d; /* Stylish blue background */
+            color: white; /* Header text color */
+            padding: 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: -10px;
+        }
+
+        #chat-logo {
+            height: 60px; /* Adjust height to fit nicely */
+            width: auto; /* Maintain aspect ratio */
+            margin-right: 15px; /* Add space between logo and title */
+            border-radius: 0; /* Remove bubble effect */
+        }
+
+        #chat-title {
+            font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+            font-weight: 700; /* Bold title */
+            font-size: 1.8rem;
+            margin: 0;
+        }
+.spinner {
+    border: 4px solid #f3f3f3; /* Light gray */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#send-button:disabled {
+    background-color: #cccccc; /* Disabled color */
+    cursor: not-allowed; /* Show not-allowed cursor */
+}
+    </style>
+</head>
+<body>
+<div id="chat-header">
+    <img src="../static/images/kidz.png" alt="Logo" id="chat-logo">
+    <h1 id="chat-title">Retrieval-Augmented Generation</h1>
+</div>
+<div id="chat-container">
+    <div id="chat-log"></div>
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Type your message here...">
+        <button id="send-button">Send</button>
+        <div id="spinner" class="spinner" style="display: none;"></div>
+    </div>
+    <div id="dynamic-content"
+         style="margin-top: 20px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; display: none;">
+        <h3>Additional Information</h3>
+        <div id="content-area"></div>
+    </div>
+</div>
+
+
+<script>
+    const apiUrl = "http://127.0.0.1:5000/rag";
+
+    document.getElementById("send-button").addEventListener("click", async () => {
+        const userInput = document.getElementById("user-input").value;
+        if (!userInput) return;
+
+        appendMessage("user", userInput);
+        document.getElementById("user-input").value = "";
+        toggleLoading(true);
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ input: userInput })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                appendMessage("bot", data.response);
+
+                // Open the dynamic file in a popup
+                if (data.dynamicFileUrl) {
+                        openInPopup(data.dynamicFileUrl);
+                    }
+                } else {
+                    appendMessage("bot", "Error: Could not fetch a response from the server.");
+                }
+        } catch (error) {
+            console.error("Error communicating with the server:", error);
+            appendMessage("bot", "Error: Unable to connect to the server.");
+        } finally {
+            toggleLoading(false);
+        }
+    });
+
+    document.getElementById("user-input").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("send-button").click();
+        }
+    });
+
+    function appendMessage(sender, message) {
+        const chatLog = document.getElementById("chat-log");
+        const messageElement = document.createElement("div");
+        messageElement.className = `message ${sender}`;
+
+        if (sender === "bot") {
+            // Format markdown-like syntax to HTML
+            const formattedMessage = formatMarkdown(message);
+            messageElement.innerHTML = formattedMessage;
+        } else {
+            messageElement.textContent = message; // User message remains plain text
+        }
+
+        chatLog.appendChild(messageElement);
+
+        const newMessageOffset = messageElement.offsetTop; // New message position
+        const chatLogHeight = chatLog.clientHeight; // Visible height of the chat log
+        chatLog.scrollTop = newMessageOffset - chatLogHeight / 2; // Scroll halfway up to include previous messages
+    }
+
+
+    function formatMarkdown(text) {
+        let formatted = text;
+
+        // Replace ### headings with <h3>
+        formatted = formatted.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+        // Replace **bold** with <strong>
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Replace *italic* with <em>
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Replace newlines with <br> for line breaks
+        formatted = formatted.replace(/\n/g, '<br>');
+
+        return formatted;
+    }
+
+
+    function formatAsHTML(data) {
+        let htmlContent = "<div style='font-size: 14px;'>";
+
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                htmlContent += `<div style="margin-bottom: 4px;">
+                    <strong>${key}:</strong> ${formatValue(data[key])}
+                </div>`;
+            }
+        }
+
+        htmlContent += "</div>";
+        return htmlContent;
+    }
+
+    function formatValue(value) {
+        if (typeof value === "object") {
+            return `<pre>${JSON.stringify(value, null, 2)}</pre>`;
+        } else {
+            return value;
+        }
+    }
+
+    function toggleLoading(isLoading) {
+        const sendButton = document.getElementById("send-button");
+        const spinner = document.getElementById("spinner");
+
+        if (isLoading) {
+            sendButton.style.display = "none";
+            spinner.style.display = "inline-block";
+        } else {
+            sendButton.style.display = "inline-block";
+            spinner.style.display = "none";
+        }
+    }
+
+     function openInPopup(url) {
+        const width = 800; // Set the width of the popup
+        const height = 600; // Set the height of the popup
+        const left = (screen.width - width) / 2; // Center horizontally
+        const top = (screen.height - height) / 2; // Center vertically
+
+        // Open a new popup window
+        window.open(
+            url,
+            "PopupWindow", // Name of the window
+            `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
+        );
+}
+</script>
+
+</body>
+</html>

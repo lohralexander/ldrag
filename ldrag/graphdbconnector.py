@@ -1,20 +1,9 @@
-from rdflib import Graph, URIRef
 import json
 import tempfile
 
-from rdflib import Graph, URIRef
-import json
-import tempfile
-
-from rdflib import Graph, URIRef
 from SPARQLWrapper import SPARQLWrapper, JSON
-import json
-import tempfile
-
 from rdflib import Graph, URIRef
-from SPARQLWrapper import SPARQLWrapper, JSON
-import json
-import tempfile
+
 
 def export_graphdb_to_json(endpoint_url, ontology_graph_uri):
     """
@@ -125,7 +114,6 @@ def export_graphdb_to_json(endpoint_url, ontology_graph_uri):
 
     print(f"Ontology exported to: {temp_file_path}")
     return temp_file_path
-
 
 
 if __name__ == '__main__':

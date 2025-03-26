@@ -1,10 +1,9 @@
 import logging
 import time
 
-from ldrag.config import Config
+from .config import Config
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
 
 def gpt_request(user_message, system_message=None, previous_conversation=None, retrieved_information=None,

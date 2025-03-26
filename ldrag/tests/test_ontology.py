@@ -2,7 +2,7 @@ import os
 import unittest
 import json
 
-from ldrag.ontology import Ontology, Node, GenericNode, GenericClass
+from ..ontology import Ontology, Node, GenericNode, GenericClass
 
 
 class TestOntology(unittest.TestCase):

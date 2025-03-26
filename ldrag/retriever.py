@@ -1,13 +1,14 @@
 import json
+import logging
 import os
 import re
 import uuid
 
 from pyvis.network import Network
 
-from config import logger
-from gptconnector import gpt_request_with_history, gpt_request
-from ontology import Ontology
+logger = logging.getLogger(__name__)
+from .gptconnector import gpt_request_with_history, gpt_request
+from .ontology import Ontology
 
 
 def information_retriever(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0):

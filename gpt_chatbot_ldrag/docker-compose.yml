@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: ldrag-retriever-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config.py:/app/config.py
+      - ./gptconnector.py:/app/gptconnector.py
+      - ./graphdbconnector.py:/app/graphdbconnector.py
+      - ./ontology.py:/app/ontology.py
+      - ./ontology_io.py:/app/ontology_io.py
+      - ./retriever.py:/app/retriever.py
+      - ./retriever:/app/retriever
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - OPENAI_API_KEY=your_openai_api_key_here
+    restart: unless-stopped

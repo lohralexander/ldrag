@@ -1,0 +1,25 @@
+# Python virtual environment folders
+venv/
+.venv/
+env/
+.lib/
+lib/
+Lib/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm project settings
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+gpt_chatbot_ldrag\static\graph/*
+!gpt_chatbot_ldrag\static\graph/.gitkeep
+/gpt_chatbot_ldrag/lib/

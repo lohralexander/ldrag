@@ -1,12 +1,9 @@
 import unittest
-import json
-import uuid
-import re
 import os
 from unittest.mock import patch, MagicMock
 
-from ontology import Ontology
-from retriever import information_retriever_with_graph
+from pypi_ldrag.ontology import Ontology
+from pypi_ldrag.retriever import information_retriever_with_graph
 
 class TestInformationRetrieverWithGraph(unittest.TestCase):
 
