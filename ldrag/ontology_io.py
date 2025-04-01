@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 
 import catboost as cb
@@ -7,7 +8,6 @@ import numpy as np
 import pandas as pd
 import shap
 import xgboost as xgb
-from config import logger
 from rdflib import Graph
 from rdflib import Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
@@ -17,6 +17,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.tree import DecisionTreeClassifier
+
+logger = logging.getLogger(__name__)
 
 
 def sklearn_model_to_ontology(model, model_id, dataset_id, task_id, X_train, X_test, y_test, output_file,
@@ -440,3 +442,5 @@ def upload_ontology(json_file, owl_file):
         json.dump(ontology_data, file, indent=4, ensure_ascii=False)
 
     print(f"? OWL file converted to JSON and saved as {json_file}")
+
+

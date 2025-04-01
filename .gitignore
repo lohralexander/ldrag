@@ -20,6 +20,9 @@ __pycache__/
 *.tmp
 *.swp
 
+# PyCharm settings
+*.iml
+
 gpt_chatbot_ldrag\static\graph/*
 !gpt_chatbot_ldrag\static\graph/.gitkeep
 /gpt_chatbot_ldrag/lib/
