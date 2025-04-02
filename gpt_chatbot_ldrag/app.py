@@ -8,7 +8,7 @@ from ldrag.retriever import information_retriever_with_graph
 
 app = Flask(__name__)
 owl = Ontology()
-owl.deserialize("./ontology/ontology.json")
+owl.deserialize("./ontology/ontology_43.json")
 app.secret_key = 'BzPopVRViW'
 
 import logging
