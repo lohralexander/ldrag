@@ -17,26 +17,41 @@ def information_retriever(ontology: Ontology, user_query: str, previous_conversa
 
 def information_retriever_with_graph(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0):
     logger.info("Starting RAG")
-    ontology_structure = ontology.get_ontology_structure()
-    # Identify the used classes, so we don't have to give gpt every single instance to pick an anker node
-    system_message = f"The following structure illustrates the class level of the ontology, which will be used to answer the subsequent questions. The node classes have instances that are not listed here. :{json.dumps(ontology_structure)}."
-    user_message = f"Only give as an answer a list of classes (following this syntax: [class1, class2, ...]) which are relevant for this user query: {user_query} Return only JSON Syntax without prefix."
-    no_class_found = True
-    find_class_iterations = 0
-    while no_class_found or find_class_iterations > 10:
-        gpt_response = gpt_request(user_message=user_message,
-                                   system_message=system_message,
-                                   previous_conversation=previous_conversation,
-                                   sleep_time=sleep_time
-                                   )
-        if gpt_response != "[]":
-            no_class_found = False
-        else:
-            find_class_iterations += 1
 
-    # Todo Besseres Errorhandling implementieren
-    found_node_class_list = re.findall(r'\w+', gpt_response)
-    logger.info(f"Found node classes: {found_node_class_list}")
+    # Find the most relevant node classes
+    ontology_structure = ontology.get_ontology_structure()
+    system_message = f"The following structure illustrates the class level of the ontology, which will be used to answer the subsequent questions. The node classes have instances that are not listed here. :{json.dumps(ontology_structure)}."
+    user_message = f"""
+    Return 5 possible interpretations of the most relevant node classes for this user query:
+    '{user_query}'.
+    Use this syntax for each line: [class1, class2, ...].
+    Only respond with JSON arrays, one per line.
+    """
+
+    gpt_response = gpt_request(
+        user_message=user_message,
+        system_message=system_message,
+        previous_conversation=previous_conversation,
+        sleep_time=sleep_time
+    )
+
+    # Extract and parse the lists
+    possible_class_lists = re.findall(r'\[(.*?)\]', gpt_response)
+    parsed_lists = [re.findall(r'\w+', cls_list) for cls_list in possible_class_lists if cls_list.strip()]
+
+    if parsed_lists:
+        found_node_class_list = parsed_lists[0]
+        logger.info(f"Found node classes (multi-try): {found_node_class_list}")
+    else:
+        # Fallback: Retry once with simple query
+        logger.warning("No valid class list found. Retrying with fallback query...")
+        fallback_message = f"Only give as an answer a list of classes (like [class1, class2]) for this query: {user_query}"
+        gpt_response_retry = gpt_request(user_message=fallback_message,
+                                         system_message=system_message,
+                                         previous_conversation=previous_conversation,
+                                         sleep_time=sleep_time)
+        found_node_class_list = re.findall(r'\w+', gpt_response_retry)
+        logger.info(f"Found node classes (fallback): {found_node_class_list}")
 
     # Identify possible starting nodes
     instance_ids = [node.get_node_id() for node in ontology.get_instances_by_class(found_node_class_list)]
