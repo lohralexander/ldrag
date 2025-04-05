@@ -11,8 +11,6 @@ class TestOntology(unittest.TestCase):
         self.node2 = Node("Test2", "Model", connections=[])
 
 
-
-
     def test_add_node(self):
         #add more nodes
         self.node = Node("Test", "Model", connections=[self.node2])
@@ -31,4 +29,5 @@ class TestOntology(unittest.TestCase):
         self.node_structure = self.ontology.get_node_structure(self.node)
         self.assertIsInstance(self.node_structure, dict, "Node structure should be a dictionary.")
         self.assertNotIn("connections", self.node_structure, "Node structure should not include connections.")
-
+        self.assertIn("Connected Instances", self.node_structure, "Node structure should 'include Connected Instances'.")
+        print(self.ontology.get_ontology_structure())
