@@ -1,0 +1,1903 @@
+{
+    "node_classes": [
+        {
+            "node_class_id": "SHAPValue",
+            "class_connections": [
+                {
+                    "target": "Model",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "ProcessedAttribute",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_class_id": "ProcessedAttribute",
+            "class_connections": [
+                {
+                    "target": "Attribute",
+                    "relation": "derivedFrom"
+                }
+            ],
+            "explanation": "A ProcessedAttribute is derived from an Attribute. To see the original Attribute and their statistics, look at the connections."
+        },
+        {
+            "node_class_id": "Preprocessing",
+            "class_connections": [
+                {
+                    "target": "Attribute",
+                    "relation": "hasInput"
+                },
+                {
+                    "target": "Dataset",
+                    "relation": "hasInput"
+                },
+                {
+                    "target": "Model",
+                    "relation": "doneFor"
+                }
+            ],
+            "explanation": "Preprocessing is the process of preparing data for machine learning algorithms. It involves cleaning, transforming, and encoding data to make it suitable for training models."
+        },
+        {
+            "node_class_id": "Dataset",
+            "class_connections": [
+                {
+                    "target": "Model",
+                    "relation": "usedBy"
+                },
+                {
+                    "target": "Attribute",
+                    "relation": "has"
+                }
+            ],
+            "explanation": "A Dataset consisting of multiple Rows."
+        },
+        {
+            "node_class_id": "Screw",
+            "class_connections": [
+                {
+                    "target": "Mechanical Component",
+                    "relation": "isA"
+                },
+                {
+                    "target": "Material",
+                    "relation": "isMadeFrom"
+                }
+            ],
+            "explanation": "A screw is a cylindrical fastener width a helical thread, used to join objects by rotational force and provide secure connections."
+        },
+        {
+            "node_class_id": "Material",
+            "class_connections": [
+                {
+                    "target": "Screw",
+                    "relation": "usedFor"
+                }
+            ],
+            "explanation": "A material is a substance or mixture of substances used in the creation, composition, or modification of physical objects, components, or systems. Materials can be characterized by their properties, composition, and intended use."
+        },
+        {
+            "node_class_id": "Mechanical Component",
+            "class_connections": [
+                {
+                    "target": "Screw",
+                    "relation": "includes"
+                }
+            ],
+            "explanation": "A mechanical component is a discrete, physical part of a mechanical system or machine, designed to perform a specific function, either as a standalone element or in combination width other components. Mechanical components contribute to the operation, structure, or movement of the system."
+        },
+        {
+            "node_class_id": "TestCase",
+            "class_connections": [
+                {
+                    "target": "Task",
+                    "relation": "implementedBy"
+                },
+                {
+                    "target": "Dataset",
+                    "relation": "basedOn"
+                }
+            ],
+            "explanation": "A screw is given to a roboter arm. The roboter arm has to lift the screw and place it in a given place on a given angle. It is saved in the form of rows"
+        },
+        {
+            "node_class_id": "Robotarm",
+            "class_connections": [
+                {
+                    "target": "Gripper",
+                    "relation": "has"
+                }
+            ],
+            "explanation": "The Niryo Ned2 is a 6-axis collaborative robotic arm designed for educational purposes, vocational training, and research. It offers a versatile platform for learning and prototyping in robotics and automation. \nNIRYO\n\nKey Features:\n\n6 Degrees of Freedom (DOF): Enables complex movements and precise positioning, closely emulating industrial robots.\n\nOpen-Source Architecture: Built on ROS (Robot Operating System), Raspberry Pi, and Arduino, allowing for extensive customization and integration.\n\nMultiple Programming Interfaces: Supports visual programming through Blockly-based Niryo Studio, as well as text-based coding in Python, C++, and MATLAB.\n\nEducational Ecosystem: Compatible width various accessories like conveyor belts and vision kits, facilitating hands-on learning in Industry 4.0 scenarios.\n\nUser-Friendly Design: Features an aluminum structure for durability and precision, width a repeatability of approximately 0.5 mm. \nGENERATION ROBOTS\n\nThe Niryo Ned2 serves as an accessible tool for students and professionals to explore robotics, programming, and automation, bridging the gap between theoretical knowledge and practical application."
+        },
+        {
+            "node_class_id": "Gripper",
+            "class_connections": [
+                {
+                    "target": "Robotarm",
+                    "relation": "partOf"
+                }
+            ],
+            "explanation": "A gripper for a robot arm is an end-effector designed to grasp, hold, and manipulate objects. It is typically attached to the arm's final joint and interacts width the environment or materials. Grippers can vary in design and functionality based on the application and type of object being handled."
+        },
+        {
+            "node_class_id": "Task",
+            "class_connections": [
+                {
+                    "target": "Model",
+                    "relation": "achievedBy"
+                }
+            ],
+            "explanation": "The Task, that a model achieves."
+        },
+        {
+            "node_class_id": "GlobalInsight",
+            "class_connections": [
+                {
+                    "target": "Model",
+                    "relation": "explains"
+                },
+                {
+                    "target": "Attribute",
+                    "relation": "basedOn"
+                }
+            ],
+            "explanation": "A global Insight explains an aspect of a model globally and not based on a single prediction, for example the impact of one single attribute."
+        },
+        {
+            "node_class_id": "Attribute",
+            "class_connections": [
+                {
+                    "target": "Preprocessing",
+                    "relation": "usedBy"
+                },
+                {
+                    "target": "Dataset",
+                    "relation": "partOf"
+                },
+                {
+                    "target": "Model",
+                    "relation": "usedToTrain"
+                }
+            ],
+            "explanation": "An attribute is a characteristic of a dataset."
+        },
+        {
+            "node_class_id": "Model",
+            "class_connections": [
+                {
+                    "target": "Dataset",
+                    "relation": "trainedWith"
+                },
+                {
+                    "target": "Task",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "GlobalInsight",
+                    "relation": "isExplainedBy"
+                },
+                {
+                    "target": "Attribute",
+                    "relation": "used"
+                }
+            ],
+            "explanation": "An attribute is a characteristic of a dataset."
+        }
+    ],
+    "node_instances": [
+        {
+            "node_id": "ScrewPlacement",
+            "node_class": "Task",
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "achieves"
+                }
+            ],
+            "usecase": "This Task is part of a non-critical research experiment to demonstrate the capabilities of a training robot. A Robot has to place different screws into different holes, placed at different angles."
+        },
+        {
+            "node_id": "ScrewPicking",
+            "node_class": "Task",
+            "connections": [
+                {}
+            ],
+            "usecase": "This Task is part of a non-critical research experiment to demonstrate the capabilities of a training robot. A Robot has to pick up screws from different positions."
+        },
+        {
+            "node_id": "testRun",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 2.0,
+            "min": 1.0,
+            "max": 3.0,
+            "std_dev": 0.816689
+        },
+        {
+            "node_id": "screwId",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 770.508475,
+            "min": 530.0,
+            "max": 1080.0,
+            "std_dev": 191.102918
+        },
+        {
+            "node_id": "screwType",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ]
+        },
+        {
+            "node_id": "headWidth",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 14.061017,
+            "min": 8.0,
+            "max": 24.65,
+            "std_dev": 4.649031
+        },
+        {
+            "node_id": "headThickness",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 5.471525,
+            "min": 3.3,
+            "max": 10.0,
+            "std_dev": 1.885954
+        },
+        {
+            "node_id": "length",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 50.169492,
+            "min": 30.0,
+            "max": 80.0,
+            "std_dev": 14.558003
+        },
+        {
+            "node_id": "weight",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 20.823729,
+            "min": 5.1,
+            "max": 57.5,
+            "std_dev": 12.894885
+        },
+        {
+            "node_id": "diameter",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 7.20339,
+            "min": 5.0,
+            "max": 10.0,
+            "std_dev": 1.902986
+        },
+        {
+            "node_id": "coating",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 0.254237,
+            "min": 0.0,
+            "max": 1.0,
+            "std_dev": 0.435534
+        },
+        {
+            "node_id": "bracketType",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ]
+        },
+        {
+            "node_id": "angle",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 45.0,
+            "min": 0.0,
+            "max": 90.0,
+            "std_dev": 33.548918
+        },
+        {
+            "node_id": "result",
+            "node_class": "Attribute",
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "partOf"
+                }
+            ],
+            "mean": 0.578625,
+            "min": 0.0,
+            "max": 1.0,
+            "std_dev": 0.493896
+        },
+        {
+            "node_id": "niryo_2024",
+            "amountOfRows": 2124,
+            "amountOfAttributes": 12,
+            "node_class": "Dataset",
+            "domain": "RWU",
+            "locationOfDataRecording": "RWU",
+            "dateOfRecording": "2024",
+            "connections": [
+                {
+                    "target": "testRun",
+                    "relation": "has"
+                },
+                {
+                    "target": "screwId",
+                    "relation": "has"
+                },
+                {
+                    "target": "screwType",
+                    "relation": "has"
+                },
+                {
+                    "target": "headWidth",
+                    "relation": "has"
+                },
+                {
+                    "target": "headThickness",
+                    "relation": "has"
+                },
+                {
+                    "target": "length",
+                    "relation": "has"
+                },
+                {
+                    "target": "weight",
+                    "relation": "has"
+                },
+                {
+                    "target": "diameter",
+                    "relation": "has"
+                },
+                {
+                    "target": "coating",
+                    "relation": "has"
+                },
+                {
+                    "target": "bracketType",
+                    "relation": "has"
+                },
+                {
+                    "target": "angle",
+                    "relation": "has"
+                },
+                {
+                    "target": "result",
+                    "relation": "has"
+                },
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "usedBy"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__screwType_Schloss",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "screwType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__screwType_Sechskant",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "screwType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__screwType_Zylinder",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "screwType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__bracketType_Einkerbung",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "bracketType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__bracketType_Silicon",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "bracketType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "cat__bracketType_Standard",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "bracketType",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__screwId",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "screwId",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__headWidth",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "headWidth",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__headThickness",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "headThickness",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__length",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "length",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__weight",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "weight",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__diameter",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "diameter",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "num__angle",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "angle",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "remainder__coating",
+            "node_class": "ProcessedAttribute",
+            "connections": [
+                {
+                    "target": "coating",
+                    "relation": "derivedFrom"
+                }
+            ]
+        },
+        {
+            "node_id": "logReg_2025_03_alx",
+            "node_class": "Model",
+            "training_information": "Trained using sklearn in Python. A split validation was used.",
+            "algorithm": "LogisticRegression",
+            "accuracy": 0.9006622516556292,
+            "precision": {
+                "Class 0": 0.9464285714285714,
+                "Class 1": 0.8736842105263158
+            },
+            "recall": {
+                "Class 0": 0.8153846153846154,
+                "Class 1": 0.9651162790697675
+            },
+            "f1Score": {
+                "Class 0": 0.8760330578512396,
+                "Class 1": 0.9171270718232044
+            },
+            "confusionMatrix": [
+                [
+                    53,
+                    12
+                ],
+                [
+                    3,
+                    83
+                ]
+            ],
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "trainedWith"
+                },
+                {
+                    "target": "ScrewPlacement",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "used"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "used"
+                }
+            ],
+            "rocAucScore": 0.962701252236136,
+            "weights": {
+                "screwId": -0.8101098182094377,
+                "screwType": 1.7487559311153094,
+                "headWidth": -0.9033147571486331,
+                "headThickness": -2.1865505599061983,
+                "length": 2.5382413138793742,
+                "weight": -0.3163593982159402,
+                "diameter": 0.11571086530969993,
+                "coating": -0.9884235045528238,
+                "bracketType": 0.1869261632407393,
+                "angle": -1.129386501705466
+            }
+        },
+        {
+            "node_id": "decTree_2025_03_alx",
+            "node_class": "Model",
+            "training_information": "Trained using sklearn in Python. A split validation was used.",
+            "algorithm": "DecisionTreeClassifier",
+            "accuracy": 0.8410596026490066,
+            "precision": {
+                "Class 0": 0.759493670886076,
+                "Class 1": 0.9305555555555556
+            },
+            "recall": {
+                "Class 0": 0.9230769230769231,
+                "Class 1": 0.7790697674418605
+            },
+            "f1Score": {
+                "Class 0": 0.8333333333333334,
+                "Class 1": 0.8481012658227848
+            },
+            "confusionMatrix": [
+                [
+                    60,
+                    5
+                ],
+                [
+                    19,
+                    67
+                ]
+            ],
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "trainedWith"
+                },
+                {
+                    "target": "ScrewPlacement",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "used"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "used"
+                }
+            ],
+            "rocAucScore": 0.8801431127012522,
+            "weights": {
+                "screwId": 0.004109390332352065,
+                "screwType": 0.1425274379978398,
+                "headWidth": 0.004457954690899779,
+                "headThickness": 0.008001970298143339,
+                "length": 0.15612564060361425,
+                "weight": 0.04497573305236316,
+                "diameter": 0.10781211727656656,
+                "coating": 0.10521521646932618,
+                "bracketType": 0.014804812492000516,
+                "angle": 0.10195130395390237
+            }
+        },
+        {
+            "node_id": "ranFor_2025_03_alx",
+            "node_class": "Model",
+            "training_information": "Trained using sklearn in Python. A split validation was used.",
+            "algorithm": "RandomForestClassifier",
+            "accuracy": 0.8874172185430463,
+            "precision": {
+                "Class 0": 0.8428571428571429,
+                "Class 1": 0.9259259259259259
+            },
+            "recall": {
+                "Class 0": 0.9076923076923077,
+                "Class 1": 0.872093023255814
+            },
+            "f1Score": {
+                "Class 0": 0.8740740740740741,
+                "Class 1": 0.8982035928143712
+            },
+            "confusionMatrix": [
+                [
+                    59,
+                    6
+                ],
+                [
+                    11,
+                    75
+                ]
+            ],
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "trainedWith"
+                },
+                {
+                    "target": "ScrewPlacement",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "used"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "used"
+                }
+            ],
+            "rocAucScore": 0.948211091234347,
+            "weights": {
+                "screwId": 0.04146499281715181,
+                "screwType": 0.07342121779329025,
+                "headWidth": 0.0183246142799581,
+                "headThickness": 0.0853838547995461,
+                "length": 0.11856121953867468,
+                "weight": 0.041420103859823115,
+                "diameter": 0.0788569482953092,
+                "coating": 0.07815593598937173,
+                "bracketType": 0.040321079648713176,
+                "angle": 0.08768231608350335
+            }
+        },
+        {
+            "node_id": "nn_2025_03_alx",
+            "node_class": "Model",
+            "training_information": "Trained using sklearn in Python. A split validation was used.",
+            "algorithm": "MLPClassifier",
+            "accuracy": 0.9271523178807947,
+            "precision": {
+                "Class 0": 0.9354838709677419,
+                "Class 1": 0.9213483146067416
+            },
+            "recall": {
+                "Class 0": 0.8923076923076924,
+                "Class 1": 0.9534883720930233
+            },
+            "f1Score": {
+                "Class 0": 0.9133858267716536,
+                "Class 1": 0.9371428571428572
+            },
+            "confusionMatrix": [
+                [
+                    58,
+                    7
+                ],
+                [
+                    4,
+                    82
+                ]
+            ],
+            "connections": [
+                {
+                    "target": "niryo_2024",
+                    "relation": "trainedWith"
+                },
+                {
+                    "target": "ScrewPlacement",
+                    "relation": "achieves"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "used"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "used"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "used"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "used"
+                }
+            ],
+            "rocAucScore": 0.9716457960644007
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__screwType_Schloss",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Schloss",
+            "mean_shap_value": 0.37157752323964016,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__screwType_Sechskant",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Sechskant",
+            "mean_shap_value": 0.7159476268976716,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__screwType_Zylinder",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Zylinder",
+            "mean_shap_value": 0.4187551854331413,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__bracketType_Einkerbung",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Einkerbung",
+            "mean_shap_value": 0.9804724398095938,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__bracketType_Silicon",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Silicon",
+            "mean_shap_value": 1.1208604689369317,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_cat__bracketType_Standard",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Standard",
+            "mean_shap_value": 0.14156559296325213,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__screwId",
+            "node_class": "SHAPValue",
+            "feature": "num__screwId",
+            "mean_shap_value": 0.10108173095042684,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__headWidth",
+            "node_class": "SHAPValue",
+            "feature": "num__headWidth",
+            "mean_shap_value": 0.8112177585724517,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__headThickness",
+            "node_class": "SHAPValue",
+            "feature": "num__headThickness",
+            "mean_shap_value": 0.14143414986834457,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__length",
+            "node_class": "SHAPValue",
+            "feature": "num__length",
+            "mean_shap_value": 0.9869370430341108,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__weight",
+            "node_class": "SHAPValue",
+            "feature": "num__weight",
+            "mean_shap_value": 0.5483126929735552,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__diameter",
+            "node_class": "SHAPValue",
+            "feature": "num__diameter",
+            "mean_shap_value": 0.18017549198920607,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_num__angle",
+            "node_class": "SHAPValue",
+            "feature": "num__angle",
+            "mean_shap_value": 0.9396663750455099,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_logReg_2025_03_alx_remainder__coating",
+            "node_class": "SHAPValue",
+            "feature": "remainder__coating",
+            "mean_shap_value": 0.48270887545724006,
+            "connections": [
+                {
+                    "target": "logReg_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__screwType_Schloss",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Schloss",
+            "mean_shap_value": 0.005444488822393084,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__screwType_Sechskant",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Sechskant",
+            "mean_shap_value": 0.13289011622281474,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__screwType_Zylinder",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Zylinder",
+            "mean_shap_value": 0.0038435504620484688,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__bracketType_Einkerbung",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Einkerbung",
+            "mean_shap_value": 0.01245525396310666,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__bracketType_Silicon",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Silicon",
+            "mean_shap_value": 0.18773844804237028,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_cat__bracketType_Standard",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Standard",
+            "mean_shap_value": 0.07699039548130955,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__screwId",
+            "node_class": "SHAPValue",
+            "feature": "num__screwId",
+            "mean_shap_value": 0.034754996478887454,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__headWidth",
+            "node_class": "SHAPValue",
+            "feature": "num__headWidth",
+            "mean_shap_value": 0.06466225856895295,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__headThickness",
+            "node_class": "SHAPValue",
+            "feature": "num__headThickness",
+            "mean_shap_value": 0.006739024723001604,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__length",
+            "node_class": "SHAPValue",
+            "feature": "num__length",
+            "mean_shap_value": 0.0829863088421652,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__weight",
+            "node_class": "SHAPValue",
+            "feature": "num__weight",
+            "mean_shap_value": 0.05407827168865764,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__diameter",
+            "node_class": "SHAPValue",
+            "feature": "num__diameter",
+            "mean_shap_value": 0.0018490110539436553,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_num__angle",
+            "node_class": "SHAPValue",
+            "feature": "num__angle",
+            "mean_shap_value": 0.10847428778897455,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_decTree_2025_03_alx_remainder__coating",
+            "node_class": "SHAPValue",
+            "feature": "remainder__coating",
+            "mean_shap_value": 0.02418798833488171,
+            "connections": [
+                {
+                    "target": "decTree_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__screwType_Schloss",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Schloss",
+            "mean_shap_value": 0.056773256525065464,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__screwType_Sechskant",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Sechskant",
+            "mean_shap_value": 0.07915538373417479,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__screwType_Zylinder",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Zylinder",
+            "mean_shap_value": 0.012823896969963408,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__bracketType_Einkerbung",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Einkerbung",
+            "mean_shap_value": 0.09465128257968398,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__bracketType_Silicon",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Silicon",
+            "mean_shap_value": 0.11574874286594443,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_cat__bracketType_Standard",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Standard",
+            "mean_shap_value": 0.016671821055310926,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__screwId",
+            "node_class": "SHAPValue",
+            "feature": "num__screwId",
+            "mean_shap_value": 0.02958200827384468,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__headWidth",
+            "node_class": "SHAPValue",
+            "feature": "num__headWidth",
+            "mean_shap_value": 0.04414373281399807,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__headThickness",
+            "node_class": "SHAPValue",
+            "feature": "num__headThickness",
+            "mean_shap_value": 0.012715247115154663,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__length",
+            "node_class": "SHAPValue",
+            "feature": "num__length",
+            "mean_shap_value": 0.06027588825103045,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__weight",
+            "node_class": "SHAPValue",
+            "feature": "num__weight",
+            "mean_shap_value": 0.04287951112459562,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__diameter",
+            "node_class": "SHAPValue",
+            "feature": "num__diameter",
+            "mean_shap_value": 0.009038073628872515,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_num__angle",
+            "node_class": "SHAPValue",
+            "feature": "num__angle",
+            "mean_shap_value": 0.08695020855102492,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_ranFor_2025_03_alx_remainder__coating",
+            "node_class": "SHAPValue",
+            "feature": "remainder__coating",
+            "mean_shap_value": 0.024417092878139472,
+            "connections": [
+                {
+                    "target": "ranFor_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__screwType_Schloss",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Schloss",
+            "mean_shap_value": 0.09132219815735555,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Schloss",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__screwType_Sechskant",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Sechskant",
+            "mean_shap_value": 0.10340150280965556,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Sechskant",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__screwType_Zylinder",
+            "node_class": "SHAPValue",
+            "feature": "cat__screwType_Zylinder",
+            "mean_shap_value": 0.03615216512655518,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__screwType_Zylinder",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__bracketType_Einkerbung",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Einkerbung",
+            "mean_shap_value": 0.10936571994564685,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Einkerbung",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__bracketType_Silicon",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Silicon",
+            "mean_shap_value": 0.16308914339530664,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Silicon",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_cat__bracketType_Standard",
+            "node_class": "SHAPValue",
+            "feature": "cat__bracketType_Standard",
+            "mean_shap_value": 0.0037177436539416408,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "cat__bracketType_Standard",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__screwId",
+            "node_class": "SHAPValue",
+            "feature": "num__screwId",
+            "mean_shap_value": 0.03591622545971659,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__screwId",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__headWidth",
+            "node_class": "SHAPValue",
+            "feature": "num__headWidth",
+            "mean_shap_value": 0.06318054615231926,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headWidth",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__headThickness",
+            "node_class": "SHAPValue",
+            "feature": "num__headThickness",
+            "mean_shap_value": 0.009280039774372306,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__headThickness",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__length",
+            "node_class": "SHAPValue",
+            "feature": "num__length",
+            "mean_shap_value": 0.12373648353756948,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__length",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__weight",
+            "node_class": "SHAPValue",
+            "feature": "num__weight",
+            "mean_shap_value": 0.05018676476410518,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__weight",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__diameter",
+            "node_class": "SHAPValue",
+            "feature": "num__diameter",
+            "mean_shap_value": 0.0300117551590834,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__diameter",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_num__angle",
+            "node_class": "SHAPValue",
+            "feature": "num__angle",
+            "mean_shap_value": 0.0956397328938698,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "num__angle",
+                    "relation": "explains"
+                }
+            ]
+        },
+        {
+            "node_id": "SHAP_nn_2025_03_alx_remainder__coating",
+            "node_class": "SHAPValue",
+            "feature": "remainder__coating",
+            "mean_shap_value": 0.054665173496392466,
+            "connections": [
+                {
+                    "target": "nn_2025_03_alx",
+                    "relation": "relatedTo"
+                },
+                {
+                    "target": "remainder__coating",
+                    "relation": "explains"
+                }
+            ]
+        }
+    ]
+}

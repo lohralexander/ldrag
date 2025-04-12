@@ -5,7 +5,7 @@ from ldrag.ontology import Node
 class TestOntology(unittest.TestCase):
     def setUp(self):
         self.ontology = Ontology()
-        self.ontology.deserialize("../../gpt_chatbot_ldrag/ontology/ontology.json")  # Adjust the path to your ontology file
+        self.ontology.deserialize("./mocks/ontology.json")
         self.node2 = Node("Test2", "Model", connections=[])
         self.shap_length_node = self.ontology.get_node("SHAP_nn_2025_03_alx_num__length")
 
