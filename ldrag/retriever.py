@@ -227,6 +227,7 @@ def create_rag_instance_graph(rag_dict, question_id, question):
 
 if __name__ == '__main__':
     owl = Ontology()
+
     owl.deserialize("../ontology_base.json")
     information_retriever_with_graph(user_query="How many entries does the niryo dataset from september have?",
                                      ontology=owl)
