@@ -61,7 +61,30 @@ class TestOntologyIO(unittest.TestCase):
         self.assertIsNotNone(explainer, "SHAP explainer should not be None.")
         self.assertTrue(hasattr(explainer, "shap_values"), "SHAP explainer should have 'shap_values' attribute.")
 
+    def test_add_dataset_metadata_from_dataframe(self):
+        # Create a sample DataFrame
+        df = pd.DataFrame({
+            "feature_1": [1, 2, 3],
+            "feature_2": [4, 5, 6],
+            "target": [0, 1, 0]
+        })
+        model_node_id_list=["Preprocessing"]
+
+
+        ldrag.ontology_io.add_dataset_metadata_from_dataframe("TestData",df,"TestDomain","testlocation" ,"1.1.2025",model_node_id_list,self.output_file)
+
+        with open(self.output_file, "r") as f:
+            data = json.load(f)
+
+        # Check if the dataset metadata is added
+        dataset_node = next((node for node in data["node_instances"] if node["node_class"] == "Dataset"), None)
+        print("Dataset node:", dataset_node)
+        self.assertIsNotNone(dataset_node, "Dataset node should be added to the ontology.")
+        self.assertIn("feature_1", dataset_node["connections"][0].values(), "Dataset node should include 'feature_1'.")
+
+
+
     def tearDown(self):
-        # Clean up the test file
+
         if os.path.exists(self.output_file):
             os.remove(self.output_file)
