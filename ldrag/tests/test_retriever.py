@@ -12,7 +12,6 @@ class TestRetriever(unittest.TestCase):
         self.ontology = Ontology()
         self.ontology.deserialize("./mocks/ontology.json")
 
-    # TODO: Possibly rewrite the tested method to be less complex
     def test_retrieve_information(self):
         # Mock return value of gpt_request
         mock_gpt_request = """["Material", "TestCase", "Dataset"]"""
@@ -35,9 +34,8 @@ class TestRetriever(unittest.TestCase):
             "SHAP_ranFor_2025_03_alx_cat__screwType_Sechskant",
         ]
 
-        # TODO: bug? query regex only works if there is a space after the bracket
         retrieved_info = retriever.execute_query(
-            query="[ SHAP_ranFor_2025_03_alx_num__weight,SHAP_ranFor_2025_03_alx_cat__screwType_Sechskant]",
+            query="[SHAP_ranFor_2025_03_alx_num__weight,SHAP_ranFor_2025_03_alx_cat__screwType_Sechskant]",
             ontology=self.ontology,
         )
         node_ids = [node.node_id for node in retrieved_info]
