@@ -1,6 +1,10 @@
 import json
 import os
 import unittest
+
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
 import ldrag.ontology_io
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
@@ -26,6 +30,22 @@ class TestOntologyIO(unittest.TestCase):
         self.output_file = "test_ontology.json"
         if os.path.exists(self.output_file):
             os.remove(self.output_file)
+
+        self.df = pd.DataFrame({
+            "numerical_feature": [1.0, 2.0, 3.0],
+            "categorical_feature": ["A", "B", "A"]
+        })
+
+        # Define a ColumnTransformer
+        self.preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", StandardScaler(), ["numerical_feature"]),
+                ("cat", OneHotEncoder(), ["categorical_feature"])
+            ]
+        )
+
+        # Fit the preprocessor
+        self.preprocessor.fit(self.df)
 
     def test_sklearn_model_to_ontology(self):
         # Call the function
@@ -83,8 +103,33 @@ class TestOntologyIO(unittest.TestCase):
         self.assertIn("feature_1", dataset_node["connections"][0].values(), "Dataset node should include 'feature_1'.")
 
 
+    def test_sanitize_iri(self):
+
+        # Test with an invalid IRI
+        invalid_iri = "http://example.com/ontology#Node 1"
+        sanitized_iri = ldrag.ontology_io.sanitize_iri(invalid_iri)
+        self.assertEqual(sanitized_iri, "http___example_com_ontology_Node_1", "Sanitized IRI should replace spaces with underscores.")
+
+    #ToDo: X_train of Method unused
+    def test_get_feature_mappings(self):
+        feature_mappings = ldrag.ontology_io.get_feature_mappings(self.preprocessor,"")
+
+        # Expected mappings
+        expected_mappings = {
+            "numerical_feature": ["num__numerical_feature"],
+            "categorical_feature": [
+                "cat__categorical_feature_A",
+                "cat__categorical_feature_B"
+            ]
+        }
+
+        # Assert the mappings are correct
+        self.assertEqual(feature_mappings, expected_mappings, "Feature mappings should match the expected output.")
+
 
     def tearDown(self):
 
         if os.path.exists(self.output_file):
             os.remove(self.output_file)
+
+
