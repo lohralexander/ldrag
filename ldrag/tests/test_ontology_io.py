@@ -1,14 +1,13 @@
 import json
 import os
 import unittest
-
+import pandas as pd
+import shap
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-
-import ldrag.ontology_io
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
-import pandas as pd
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+import ldrag.ontology_io
 
 
 class TestOntologyIO(unittest.TestCase):
@@ -69,17 +68,17 @@ class TestOntologyIO(unittest.TestCase):
 
         # Check if the model node is added
         model_node = next((node for node in data["node_instances"] if node["node_id"] == model_id), None)
-        print("Model node:", model_node)
         self.assertIsNotNone(model_node, "Model node should be added to the ontology.")
         self.assertEqual(model_node["node_class"], "Model", "Node class should be 'Model'.")
         self.assertIn("accuracy", model_node, "Model node should include accuracy.")
 
-    # ToDo: Add more tests for other classifiers
     def test_get_shap_explainer(self):
         explainer = ldrag.ontology_io.get_shap_explainer(self.model, self.X_train)
-        print("SHAP explainer:", explainer)
+
         self.assertIsNotNone(explainer, "SHAP explainer should not be None.")
-        self.assertTrue(hasattr(explainer, "shap_values"), "SHAP explainer should have 'shap_values' attribute.")
+        self.assertTrue(isinstance(explainer, shap.TreeExplainer), "SHAP explainer should be a TreeExplainer.")
+        shap_values = explainer.shap_values(self.X_test)
+        self.assertEqual(len(shap_values), 2, "SHAP values should have the same length as the number of classes.")
 
     def test_add_dataset_metadata_from_dataframe(self):
         # Create a sample DataFrame
@@ -88,31 +87,29 @@ class TestOntologyIO(unittest.TestCase):
             "feature_2": [4, 5, 6],
             "target": [0, 1, 0]
         })
-        model_node_id_list=["Preprocessing"]
+        model_node_id_list = ["Preprocessing"]
 
-
-        ldrag.ontology_io.add_dataset_metadata_from_dataframe("TestData",df,"TestDomain","testlocation" ,"1.1.2025",model_node_id_list,self.output_file)
+        ldrag.ontology_io.add_dataset_metadata_from_dataframe("TestData", df, "TestDomain", "testlocation", "1.1.2025",
+                                                              model_node_id_list, self.output_file)
 
         with open(self.output_file, "r") as f:
             data = json.load(f)
 
         # Check if the dataset metadata is added
         dataset_node = next((node for node in data["node_instances"] if node["node_class"] == "Dataset"), None)
-        print("Dataset node:", dataset_node)
         self.assertIsNotNone(dataset_node, "Dataset node should be added to the ontology.")
         self.assertIn("feature_1", dataset_node["connections"][0].values(), "Dataset node should include 'feature_1'.")
-
 
     def test_sanitize_iri(self):
 
         # Test with an invalid IRI
         invalid_iri = "http://example.com/ontology#Node 1"
         sanitized_iri = ldrag.ontology_io.sanitize_iri(invalid_iri)
-        self.assertEqual(sanitized_iri, "http___example_com_ontology_Node_1", "Sanitized IRI should replace spaces with underscores.")
+        self.assertEqual(sanitized_iri, "http___example_com_ontology_Node_1",
+                         "Sanitized IRI should replace spaces with underscores.")
 
-    #ToDo: X_train of Method unused
     def test_get_feature_mappings(self):
-        feature_mappings = ldrag.ontology_io.get_feature_mappings(self.preprocessor,"")
+        feature_mappings = ldrag.ontology_io.get_feature_mappings(self.preprocessor, "")
 
         # Expected mappings
         expected_mappings = {
@@ -126,10 +123,7 @@ class TestOntologyIO(unittest.TestCase):
         # Assert the mappings are correct
         self.assertEqual(feature_mappings, expected_mappings, "Feature mappings should match the expected output.")
 
-
     def tearDown(self):
 
         if os.path.exists(self.output_file):
             os.remove(self.output_file)
-
-
