@@ -29,6 +29,18 @@ class TestRetriever(unittest.TestCase):
             self.assertEqual(retrieved_info[0].get('Node Instance ID'), expected_output)
 
 
+            #test with start node
+            retrieved_info, graph_path = retriever.information_retriever_with_graph(
+                ontology=self.ontology,
+                user_query="Test",
+                previous_conversation=[],
+                starting_node="SHAP_nn_2025_03_alx_num__length"
+            )
+            expected_output = 'SHAP_nn_2025_03_alx_num__length'
+            print("Retrieved information:", retrieved_info)
+            self.assertEqual(retrieved_info[0].get('Node Instance ID'), expected_output)
+
+
 
     def test_execute_query(self):
         expected_nodes = [
