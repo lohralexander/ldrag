@@ -28,6 +28,8 @@ class TestRetriever(unittest.TestCase):
             print("Retrieved information:", retrieved_info)
             self.assertEqual(retrieved_info[0].get('Node Instance ID'), expected_output)
 
+
+
     def test_execute_query(self):
         expected_nodes = [
             "SHAP_ranFor_2025_03_alx_num__weight",
