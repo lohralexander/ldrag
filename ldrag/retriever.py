@@ -15,15 +15,14 @@ def information_retriever(ontology: Ontology, user_query: str, previous_conversa
     return information_retriever_with_graph(ontology, user_query, previous_conversation, sleep_time)[0]
 
 
-def information_retriever_with_graph(ontology: Ontology, user_query: str =None, previous_conversation=None, sleep_time=0,starting_node=None):
+def information_retriever_with_graph(ontology: Ontology, user_query: str =None, previous_conversation=None, sleep_time=0,starting_node:str=None):
     starting_nodes = starting_node
-    retrieved_node_dict = {}
     ontology_structure = ontology.get_ontology_structure()
     if starting_nodes is not None:
         retrieved_node_dict=ontology.get_nodes([starting_node])
         starting_nodes = [ontology.get_node_structure(node) for node in retrieved_node_dict.values()]
 
-    elif starting_nodes is None:
+    else:
         logger.info("Starting RAG")
         # Find the most relevant node classes
 
