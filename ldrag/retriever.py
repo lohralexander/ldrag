@@ -20,7 +20,6 @@ def information_retriever_with_graph(ontology: Ontology, user_query: str =None, 
     ontology_structure = ontology.get_ontology_structure()
     if starting_nodes is not None:
         retrieved_node_dict=ontology.get_nodes([starting_node])
-        starting_nodes = [ontology.get_node_structure(node) for node in retrieved_node_dict.values()]
 
     else:
         logger.info("Starting RAG")
@@ -69,7 +68,8 @@ def information_retriever_with_graph(ontology: Ontology, user_query: str =None, 
         found_node_instances_list = re.findall(r'\w+', gpt_response)
         retrieved_node_dict=ontology.get_nodes(found_node_instances_list)
         logger.info(f"Found node instances: {found_node_instances_list}")
-        starting_nodes = [ontology.get_node_structure(node) for node in retrieved_node_dict.values()]
+
+    starting_nodes = [ontology.get_node_structure(node) for node in retrieved_node_dict.values()]
 
 
     logger.info("Beginning iterative ontology search ")
