@@ -1,12 +1,15 @@
 import copy
 
 from flask import Flask, request, jsonify, render_template, session
+from flask_cors import CORS # Import CORS
 
 from ldrag.gptconnector import gpt_request_with_history
 from ldrag.ontology import Ontology
 from ldrag.retriever import information_retriever_with_graph
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
+
 owl = Ontology()
 owl.deserialize("./ontology/ontology_43.json")
 app.secret_key = 'BzPopVRViW'
@@ -56,4 +59,4 @@ def rag_endpoint():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
