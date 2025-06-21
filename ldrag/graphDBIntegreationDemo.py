@@ -3,7 +3,11 @@ import json
 import logging
 import uuid
 from neo4j import GraphDatabase
-
+from neo4j import GraphDatabase
+from neo4j_graphrag.retrievers import VectorRetriever
+from neo4j_graphrag.llm import OpenAILLM
+from neo4j_graphrag.generation import GraphRAG
+from neo4j_graphrag.embeddings import OpenAIEmbeddings
 from ldrag.retriever import information_retriever_with_graph
 
 logger = logging.getLogger(__name__)
@@ -149,12 +153,44 @@ class SimpleNode:
 
     def get_internal_structure(self):
         return list(self.__dict__.keys())
-
+def retrieve_relevant_nodes(uri, user, password, user_query):
+    """
+    Stellt eine Verbindung zu Neo4j her und sucht nach Knoten,
+    deren Eigenschaft 'name' den Suchbegriff enthält.
+    """
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    cypher_query = """
+   CALL db.index.fulltext.queryNodes('nameIndex', $user_query)
+    YIELD node, score
+    RETURN node, score
+    LIMIT 10
+    """
+    retrieved_nodes = []
+    with driver.session() as session:
+        result = session.run(cypher_query, user_query=user_query)
+        for record in result:
+            node = record["node"]
+            score = record["score"]
+            node_id = node.id
+            labels = list(node.labels)
+            properties = dict(node)
+            retrieved_nodes.append({
+                "id": str(node_id),
+                "labels": labels,
+                "properties": properties,
+                "score": score
+            })
+    driver.close()
+    logger.info("Knoten wurden aus der Datenbank abgerufen.")
+    return retrieved_nodes
 def main():
     # Connection details from environment variables or hard-coded for demo.
-    neo4j_uri = os.environ.get("NEO4J_URI")
-    neo4j_user = os.environ.get("NEO4J_USER")
-    neo4j_password = os.environ.get("NEO4J_PASSWORD")
+    neo4j_uri = os.environ.get("NEO4J_URI","neo4j+s://ae66b6dc.databases.neo4j.io")
+    neo4j_user = os.environ.get("NEO4J_USER","neo4j")
+    neo4j_password = os.environ.get("NEO4J_PASSWORD","kcB3a0jyR0GYFy6KUHWiOb5HJf4qtkp6JYR4IrQUdqA")
+    update_embeddings_to_3072(neo4j_uri, neo4j_user, neo4j_password)
+    return
+    run_rag_demo(neo4j_uri, neo4j_user, neo4j_password)
 
     # Create our GraphDB ontology interface
     ontology = GraphDBOntology(neo4j_uri, neo4j_user, neo4j_password)
@@ -163,17 +199,129 @@ def main():
     # For demo, write out the graph visualization used by RAG.
     # In practice, the user_query would come from an end user.
     user_query = "Which model has the highest ROC AUC"
-    retrieved_info, graph_path = information_retriever_with_graph(
-        ontology=ontology,
-        user_query=user_query,
-        sleep_time=0
-    )
+    #retrieved_info, graph_path = information_retriever_with_graph(
+    #    ontology=ontology,
+    #    user_query=user_query,
+    #    sleep_time=0
+    #)
 
     print("Retrieved information:")
-    print(json.dumps(retrieved_info, indent=2))
-    print(f"Graph visualization saved at: {graph_path}")
+    print(json.dumps(retrieve_relevant_nodes(neo4j_uri,neo4j_user,neo4j_password,  user_query), indent=2))
+    #print(f"Graph visualization saved at: {graph_path}")
 
     ontology.close()
 
+
+def run_rag_demo(uri, user, password, index_name="nodeEmbedding"):
+    from neo4j import GraphDatabase
+    from neo4j_graphrag.retrievers import VectorRetriever
+    from neo4j_graphrag.llm import OpenAILLM
+    from neo4j_graphrag.generation import GraphRAG
+    from neo4j_graphrag.embeddings import OpenAIEmbeddings
+
+    # Connect to Neo4j database
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+
+    # Create Embedder object
+    embedder = OpenAIEmbeddings(model="text-embedding-3-small")
+
+    # Initialize the retriever
+    retriever = VectorRetriever(driver, index_name, embedder)
+
+    # LLM
+    llm = OpenAILLM(model_name="gpt-4o", model_params={"temperature": 0})
+
+    # Initialize the RAG pipeline
+    rag = GraphRAG(retriever=retriever, llm=llm)
+
+    # Query the graph
+    query_text = "How do I do similarity search in Neo4j?"
+    response = rag.search(query_text=query_text, retriever_config={"top_k": 5})
+    print(response.answer)
+
+
+
+
+def update_embeddings_to_3072(uri, user, password, text_property_candidates=None, label="VectorNode", embedding_property="embedding3072"):
+    """
+    Aktualisiert alle Knoten mit dem angegebenen Label und erzeugt ein 3072-dimensionales Embedding
+    für ein passendes Textfeld. Das neue Embedding wird als embedding3072 gespeichert.
+    """
+    from neo4j import GraphDatabase
+    from neo4j_graphrag.embeddings import OpenAIEmbeddings
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    embedder = OpenAIEmbeddings(model="text-embedding-3-small")
+    if text_property_candidates is None:
+        text_property_candidates = ["usecase", "feature", "algorithm", "node_id"]
+    with driver.session() as session:
+        # Alle relevanten Knoten abfragen
+        cypher = f"""
+        MATCH (n:{label})
+        RETURN id(n) as id, n
+        """
+        result = session.run(cypher)
+        for record in result:
+            node = record["n"]
+            node_id = record["id"]
+            # Passendes Textfeld suchen
+            text = None
+            for prop in text_property_candidates:
+                if prop in node and node[prop]:
+                    text = str(node[prop])
+                    break
+            if not text:
+                print(f"Kein"
+                      f""
+                      f""
+                      f" Textfeld für Knoten {node_id} gefunden, überspringe.")
+                continue
+            # Embedding erzeugen
+            embedding = embedder.embed_query(text)
+            # Embedding speichern
+            session.run(
+                f"MATCH (n) WHERE node_id(n) = $id SET n.{embedding_property} = $embedding",
+                id=node_id, embedding=embedding
+            )
+            print(f"Knoten {node_id}: embedding3072 aktualisiert.")
+    driver.close()
+
+def create_vector_index_in_neo4j(uri, user, password, index_name, label, embedding_property, dimensions, similarity_fn="cosine"):
+    """
+    Erstellt einen Vektor-Index in Neo4j mit den angegebenen Parametern.
+    """
+    from neo4j import GraphDatabase
+    from neo4j_graphrag.indexes import create_vector_index
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    create_vector_index(
+        driver,
+        index_name,
+        label=label,
+        embedding_property=embedding_property,
+        dimensions=dimensions,
+        similarity_fn=similarity_fn,
+    )
+    driver.close()
+    print(f"Vektor-Index '{index_name}' für Label '{label}' und Property '{embedding_property}' mit {dimensions} Dimensionen wurde erstellt.")
+
+
+def upsert_vector_to_neo4j(uri, user, password, node_ids, embedding_property, embeddings, entity_type_str="NODE"):
+    """
+    Fügt Vektoren für gegebene Knoten-IDs in Neo4j ein oder aktualisiert sie.
+    entity_type_str: "NODE" oder "RELATIONSHIP"
+    """
+    from neo4j import GraphDatabase
+    from neo4j_graphrag.indexes import upsert_vectors
+    from neo4j_graphrag.types import EntityType
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    entity_type = EntityType[entity_type_str.upper()]
+    upsert_vectors(
+        driver,
+        ids=node_ids,
+        embedding_property=embedding_property,
+        embeddings=embeddings,
+        entity_type=entity_type,
+    )
+    driver.close()
+    print(f"Vektoren für {len(node_ids)} {entity_type_str}(s) wurden in Neo4j upserted.")
 if __name__ == '__main__':
     main()
