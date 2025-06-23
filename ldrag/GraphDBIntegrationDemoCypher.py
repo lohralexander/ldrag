@@ -1,7 +1,11 @@
 from langchain_community.llms.openai import OpenAIChat
 from neo4j import GraphDatabase
+import dotenv
+from pathlib import Path
 
 from ldrag.gptconnector import logger
+
+dotenv.load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 
 class GraphDBOntology:
@@ -122,17 +126,19 @@ class GraphDBOntology:
 def retrieve_nodes_with_llm_query(uri, user, password, user_query):
     """
     Nutzt LangChain und ein LLM, um eine Cypher-Query zu generieren und relevante Knoten aus Neo4j zu holen.
+    Gibt die wahrscheinlichsten Kandidaten als JSON zurück.
     """
-    from langchain_neo4j import Neo4jGraph,GraphCypherQAChain
-
+    from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
     from langchain_openai import ChatOpenAI
+    import json
     graph = Neo4jGraph(url=uri, username=user, password=password)
 
     llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
     chain = GraphCypherQAChain.from_llm(
         llm,
         graph=graph,
-        allow_dangerous_requests=True
+        allow_dangerous_requests=True,
+        verbose=True
     )
     antwort = chain.invoke(user_query)
     return antwort
@@ -165,10 +171,9 @@ class SimpleNode:
 
 if __name__ == "__main__":
     import os
-    uri = os.environ.get("NEO4J_URI", "neo4j+s://ae66b6dc.databases.neo4j.io")
-    user = os.environ.get("NEO4J_USER", "neo4j")
-    password = os.environ.get("NEO4J_PASSWORD", "kcB3a0jyR0GYFy6KUHWiOb5HJf4qtkp6JYR4IrQUdqA")
-    user_query = "Which model has the highest ROC AUC?"
+    uri = os.getenv("NEO4J_URI")
+    user = os.getenv("NEO4J_USER")
+    password = os.getenv("NEO4J_PASSWORD")
+    user_query = "Welche modelle haben die besten shap values?"
     print("Antwort von LLM-Cypher:")
     print(retrieve_nodes_with_llm_query(uri, user, password, user_query))
-

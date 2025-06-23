@@ -2,6 +2,9 @@ import os
 import json
 import logging
 import uuid
+from pathlib import Path
+
+import dotenv
 from neo4j import GraphDatabase
 from neo4j import GraphDatabase
 from neo4j_graphrag.retrievers import VectorRetriever
@@ -12,6 +15,7 @@ from ldrag.retriever import information_retriever_with_graph
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+dotenv.load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 class GraphDBOntology:
     """
@@ -185,9 +189,9 @@ def retrieve_relevant_nodes(uri, user, password, user_query):
     return retrieved_nodes
 def main():
     # Connection details from environment variables or hard-coded for demo.
-    neo4j_uri = os.environ.get("NEO4J_URI","neo4j+s://ae66b6dc.databases.neo4j.io")
-    neo4j_user = os.environ.get("NEO4J_USER","neo4j")
-    neo4j_password = os.environ.get("NEO4J_PASSWORD","kcB3a0jyR0GYFy6KUHWiOb5HJf4qtkp6JYR4IrQUdqA")
+    neo4j_uri = os.environ.get("NEO4J_URI")
+    neo4j_user = os.environ.get("NEO4J_USER")
+    neo4j_password = os.environ.get("NEO4J_PASSWORD")
     update_embeddings_to_3072(neo4j_uri, neo4j_user, neo4j_password)
     return
     run_rag_demo(neo4j_uri, neo4j_user, neo4j_password)
