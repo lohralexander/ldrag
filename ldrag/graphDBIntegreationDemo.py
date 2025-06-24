@@ -47,24 +47,26 @@ class GraphDBOntology:
         query = """
         MATCH (n)-[r]->(m)
         RETURN n, r, m
-        LIMIT 50
+        LIMIT 100
         """
         with self.driver.session() as session:
             result = session.run(query)
+
             for record in result:
                 node_n = record["n"]
                 # Create a minimal node structure that contains:
                 # - node_id: use the Neo4j id converted to string
                 # - node_class: use one of n's labels
                 # - connections: list of dictionaries with target and relation
-                node_id = str(node_n.id)
+                node_id = str(node_n.element_id)
                 labels = list(node_n.labels)
                 properties = dict(node_n)
                 # Define node_class as the first label if available
                 node_class = labels[0] if labels else "UnknownClass"
                 # Build a simple connection from every outgoing relationship.
                 connection = {
-                    "target": str(record["m"].id),
+                    "target": str(record["m"].element_id),
+
                     "relation": record["r"].type
                 }
                 # Build node structure if not exists
@@ -78,7 +80,7 @@ class GraphDBOntology:
                 else:
                     self._node_dict[node_id].connections.append(connection)
                 # Also add target node if not present.
-                target_id = str(record["m"].id)
+                target_id = str(record["m"].element_id)
                 if target_id not in self._node_dict:
                     target_labels = list(record["m"].labels)
                     target_class = target_labels[0] if target_labels else "UnknownClass"
@@ -189,9 +191,9 @@ def retrieve_relevant_nodes(uri, user, password, user_query):
     return retrieved_nodes
 def main():
     # Connection details from environment variables or hard-coded for demo.
-    neo4j_uri = os.environ.get("NEO4J_URI")
-    neo4j_user = os.environ.get("NEO4J_USER")
-    neo4j_password = os.environ.get("NEO4J_PASSWORD")
+    neo4j_uri = os.environ.get("NEO4J_URI","neo4j+s://ae66b6dc.databases.neo4j.io")
+    neo4j_user = os.environ.get("NEO4J_USER", "neo4j")
+    neo4j_password = os.environ.get("NEO4J_PASSWORD","kcB3a0jyR0GYFy6KUHWiOb5HJf4qtkp6JYR4IrQUdqA" )
     update_embeddings_to_3072(neo4j_uri, neo4j_user, neo4j_password)
     return
     run_rag_demo(neo4j_uri, neo4j_user, neo4j_password)
@@ -202,7 +204,7 @@ def main():
 
     # For demo, write out the graph visualization used by RAG.
     # In practice, the user_query would come from an end user.
-    user_query = "Which model has the highest ROC AUC"
+    user_query = "Which model has the highest ROC AUC?"
     #retrieved_info, graph_path = information_retriever_with_graph(
     #    ontology=ontology,
     #    user_query=user_query,

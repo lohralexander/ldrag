@@ -130,18 +130,21 @@ def retrieve_nodes_with_llm_query(uri, user, password, user_query):
     """
     from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
     from langchain_openai import ChatOpenAI
-    import json
     graph = Neo4jGraph(url=uri, username=user, password=password)
-
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
+    graph.refresh_schema()
+    llm = ChatOpenAI(model="o4-mini-2025-04-16", temperature=1)
+    qallm= ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
     chain = GraphCypherQAChain.from_llm(
-        llm,
+        cypher_llm=llm,
+        qa_llm=qallm,
         graph=graph,
+        top_k=5,
         allow_dangerous_requests=True,
-        verbose=True
+        verbose=True,
+        return_direct=True
     )
     antwort = chain.invoke(user_query)
-    return antwort
+    return antwort["result"]
 
 class SimpleNode:
     """
