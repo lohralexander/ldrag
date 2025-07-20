@@ -11,8 +11,8 @@ from .gptconnector import gpt_request_with_history, gpt_request
 from .ontology import Ontology
 
 
-def information_retriever(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0):
-    return information_retriever_with_graph(ontology, user_query, previous_conversation, sleep_time)[0]
+def information_retriever(ontology: Ontology, user_query: str, previous_conversation=None, sleep_time=0, starting_node:str=None):
+    return information_retriever_with_graph(ontology, user_query, previous_conversation, sleep_time,starting_node)[0]
 
 
 def information_retriever_with_graph(ontology: Ontology, user_query: str =None, previous_conversation=None, sleep_time=0,starting_node:str=None):
